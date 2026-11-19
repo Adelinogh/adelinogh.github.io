@@ -87,11 +87,23 @@
   });
   if (window.location.hash === '#book') loadCalendly();
 
-  // Booking confirmed inside the embed: go to the confirmation page.
+  // Meta Pixel events from the booking calendar (no personal data is sent).
+  function track() {
+    try { if (typeof window.fbq === 'function') window.fbq.apply(window, arguments); } catch (err) {}
+  }
+  var bookingStarted = false;
+
+  // Booking confirmed inside the embed: record the conversion, then go to the confirmation page.
   window.addEventListener('message', function (e) {
     if (e.origin !== CAL_ORIGIN || !e.data || typeof e.data !== 'object') return;
+    if (e.data.event === 'calendly.date_and_time_selected' && !bookingStarted) {
+      bookingStarted = true;
+      track('trackCustom', 'BookingStarted');
+    }
     if (e.data.event === 'calendly.event_scheduled') {
-      window.location.href = '/thank-you/';
+      var eventId = 'sch_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+      track('track', 'Schedule', {}, { eventID: eventId });
+      setTimeout(function () { window.location.href = '/thank-you/'; }, 500);
     }
   });
 })();
