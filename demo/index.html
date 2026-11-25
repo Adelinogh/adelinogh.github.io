@@ -146,6 +146,19 @@
   </div>
 </footer>
 
+<script>
+/* Repassa os utm_* desta página aos links para /diagnostic/, para o Calendly saber de onde veio o agendamento. */
+(function () {
+  var q = new URLSearchParams(window.location.search), keep = [];
+  q.forEach(function (v, k) { if (/^utm_(source|medium|campaign|content|term)$/.test(k) && v) keep.push([k, v.slice(0, 200)]); });
+  if (!keep.length) return;
+  document.querySelectorAll('a[href^="/diagnostic/"]').forEach(function (a) {
+    var u = new URL(a.getAttribute('href'), window.location.origin);
+    keep.forEach(function (p) { if (!u.searchParams.has(p[0])) u.searchParams.set(p[0], p[1]); });
+    a.setAttribute('href', u.pathname + u.search + u.hash);
+  });
+})();
+</script>
 <script src="/assets/site.js" defer></script>
 </body>
 </html>
